@@ -15,6 +15,13 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
     
+private slots:
+    void on_pushButton_clicked();
+
+    void on_graphicsView_customContextMenuRequested(const QPoint &pos);
+
+    void on_graphicsView_destroyed();
+
 private:
     Ui::MainWindow *ui;
 };
