@@ -17,10 +17,11 @@ public:
     
 private slots:
     void on_pushButton_clicked();
-
-    void on_graphicsView_customContextMenuRequested(const QPoint &pos);
-
-    void on_graphicsView_destroyed();
+    void openPicture();
+    void savePictureAs();
+    void savePicture();
+    void quit();
+    void denoisingFilter();
 
 private:
     Ui::MainWindow *ui;
