@@ -2,6 +2,14 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include "QMessageBox"
+#include "QFileDialog"
+#include "QImage"
+#include "QLabel"
+#include "QScrollArea"
+#include "QGraphicsScene"
+#include "QGraphicsPixmapItem"
+#include "QGraphicsView"
 
 namespace Ui {
 class MainWindow;
@@ -20,7 +28,6 @@ private slots:
     void openPicture();
     void savePictureAs();
     void savePicture();
-    void quit();
     void denoisingFilter();
 
 private:
