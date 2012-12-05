@@ -33,13 +33,17 @@ void MainWindow::openPicture()
 
 void MainWindow::savePictureAs()
 {
-        QString fileName2 = QFileDialog::getSaveFileName(this ,tr("Save as..") ,QDir::currentPath(),tr("Image (*jpg)"));
-            if (fileName2.isEmpty())
+    QMessageBox::StandardButton reply;
+    reply = QMessageBox::question(this, "Save it??", "Do you really to save this image??", QMessageBox::Yes | QMessageBox::No);
+    if(reply == QMessageBox::Yes)
+    {
+        QString fileOpenedName = QFileDialog::getSaveFileName(this ,tr("Save as..") ,QDir::currentPath(),tr("Image (*jpg)"));
+            if (fileOpenedName.isEmpty())
                  return;
              else {
-                writeFile(fileName2);
-                fileOpenedName = fileName2;
+                writeFile(fileOpenedName);
         }
+    }
 }
 
 void MainWindow::savePicture()
@@ -60,7 +64,7 @@ void MainWindow::writeFile(QString fileName)
         QMessageBox::information(this, tr("Unable to open file"), file.errorString());
         return;
     }
-    image.save(fileName,"JPG");
+    imageAfter.save(fileName,"JPG");
     file.close();
 }
 
@@ -72,7 +76,7 @@ void MainWindow::readFile(QString fileName)
         QMessageBox::information(this, tr("Unable to open file"), file.errorString());
         return;
     }
-    image.load(fileName,"JPG");
+    imageBefore.load(fileName,"JPG");
     file.close();
 }
 
@@ -80,7 +84,7 @@ void MainWindow::showImageBefore()
 {
     scene = new QGraphicsScene(this);
     ui->graphicsView->setScene(scene);
-    QGraphicsPixmapItem* item = new QGraphicsPixmapItem(QPixmap::fromImage(image));
+    QGraphicsPixmapItem* item = new QGraphicsPixmapItem(QPixmap::fromImage(imageBefore));
     scene->addItem(item);
     ui->graphicsView->show();
 }
@@ -89,12 +93,24 @@ void MainWindow::showImageAfter()
 {
     scene = new QGraphicsScene(this);
     ui->graphicsView_2->setScene(scene);
-    QGraphicsPixmapItem* item = new QGraphicsPixmapItem(QPixmap::fromImage(image));
+    QGraphicsPixmapItem* item = new QGraphicsPixmapItem(QPixmap::fromImage(imageAfter));
     scene->addItem(item);
     ui->graphicsView_2->show();
 }
 
 void MainWindow::denoisingFilter()
 {
-
+    QPixmap pixMap;
+    pixMap.fromImage(imageBefore,Qt::AutoColor);
+    QRgb **rgbColor;
+    rgbColor = new QRgb*[pixMap.width()];
+    for(int i = 0 ; i < pixMap.width() ; i++)
+    {
+        rgbColor[i] = new QRgb[pixMap.height()];
+        for(int j = 0 ; j < pixMap.height() ; j++)
+            rgbColor[i][j] = imageBefore.pixel(i,j);
+    }
+    for(int i = 0 ; i < pixMap.width() ; i++)
+        delete [] rgbColor[i];
+    delete [] rgbColor;
 }

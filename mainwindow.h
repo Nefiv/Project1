@@ -35,7 +35,7 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
-    QImage image;
+    QImage imageBefore, imageAfter;
     QString fileOpenedName;
     QGraphicsScene* scene;
 };
