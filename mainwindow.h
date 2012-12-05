@@ -24,12 +24,12 @@ public:
     ~MainWindow();
     
 private slots:
-    void on_pushButton_clicked();
     void openPicture();
     void savePictureAs();
     void savePicture();
     void denoisingFilter();
-    void showImage();
+    void showImageBefore();
+    void showImageAfter();
     void writeFile(QString fileName);
     void readFile(QString fileName);
 
@@ -37,6 +37,7 @@ private:
     Ui::MainWindow *ui;
     QImage image;
     QString fileOpenedName;
+    QGraphicsScene* scene;
 };
 
 #endif // MAINWINDOW_H

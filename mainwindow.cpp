@@ -6,8 +6,9 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
-
     ui->setupUi(this);
+    ui->label->setStyleSheet("* { background-color: rgb(170,255,127) }");
+    ui->label_2->setStyleSheet("* { background-color: rgb(85,170,255) }");
     connect(ui->actionOpen, SIGNAL(triggered()), this, SLOT(openPicture()));
     connect(ui->actionSave_as, SIGNAL(triggered()), this, SLOT(savePictureAs()));
     connect(ui->actionSave, SIGNAL(triggered()), this, SLOT(savePicture()));
@@ -20,17 +21,13 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::on_pushButton_clicked()
-{
-
-}
-
 void MainWindow::openPicture()
 {
     fileOpenedName = QFileDialog::getOpenFileName(this, tr("Open File"), QDir::currentPath(),tr("Image (*jpg)"));
          if (!fileOpenedName.isEmpty()) {
              readFile(fileOpenedName);
-            showImage();
+            showImageBefore();
+            showImageAfter();
          }
 }
 
@@ -79,13 +76,22 @@ void MainWindow::readFile(QString fileName)
     file.close();
 }
 
-void MainWindow::showImage()
+void MainWindow::showImageBefore()
 {
-    QGraphicsScene* scene = new QGraphicsScene();
-    QGraphicsView* view = new QGraphicsView(scene);
+    scene = new QGraphicsScene(this);
+    ui->graphicsView->setScene(scene);
     QGraphicsPixmapItem* item = new QGraphicsPixmapItem(QPixmap::fromImage(image));
     scene->addItem(item);
-    view->show();
+    ui->graphicsView->show();
+}
+
+void MainWindow::showImageAfter()
+{
+    scene = new QGraphicsScene(this);
+    ui->graphicsView_2->setScene(scene);
+    QGraphicsPixmapItem* item = new QGraphicsPixmapItem(QPixmap::fromImage(image));
+    scene->addItem(item);
+    ui->graphicsView_2->show();
 }
 
 void MainWindow::denoisingFilter()
