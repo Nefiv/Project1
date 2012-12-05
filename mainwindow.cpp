@@ -22,37 +22,70 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_pushButton_clicked()
 {
-    QMessageBox msbox;
-    msbox.setText("KURWA MAC!!");
-    msbox.exec();
+
 }
 
 void MainWindow::openPicture()
 {
-     QString fileName1 = QFileDialog::getOpenFileName(this,
-                                         tr("Open File"), QDir::currentPath());
-         if (!fileName1.isEmpty()) {
-             QImage image(fileName1);
-             if (image.isNull()) {
-                 QMessageBox::information(this, tr("Image Viewer"),
-                                          tr("Cannot load %1.").arg(fileName1));
-                 return;
-             }
-             QGraphicsScene* scene = new QGraphicsScene();
-             QGraphicsView* view = new QGraphicsView(scene);
-             QGraphicsPixmapItem* item = new QGraphicsPixmapItem(QPixmap::fromImage(image));
-             scene->addItem(item);
-             view->show();
+    fileOpenedName = QFileDialog::getOpenFileName(this, tr("Open File"), QDir::currentPath(),tr("Image (*jpg)"));
+         if (!fileOpenedName.isEmpty()) {
+             readFile(fileOpenedName);
+            showImage();
          }
 }
 
 void MainWindow::savePictureAs()
 {
+        QString fileName2 = QFileDialog::getSaveFileName(this ,tr("Save as..") ,QDir::currentPath(),tr("Image (*jpg)"));
+            if (fileName2.isEmpty())
+                 return;
+             else {
+                writeFile(fileName2);
+                fileOpenedName = fileName2;
+        }
 }
 
 void MainWindow::savePicture()
 {
+    QMessageBox::StandardButton reply;
+    reply = QMessageBox::question(this, "Save it??", "Do you really to save this image??", QMessageBox::Yes | QMessageBox::No);
+    if(reply == QMessageBox::Yes)
+    {
+        writeFile(fileOpenedName);
+    }
+}
 
+void MainWindow::writeFile(QString fileName)
+{
+    QFile file(fileName);
+    if(!file.open(QFile::WriteOnly))
+    {
+        QMessageBox::information(this, tr("Unable to open file"), file.errorString());
+        return;
+    }
+    image.save(fileName,"JPG");
+    file.close();
+}
+
+void MainWindow::readFile(QString fileName)
+{
+    QFile file(fileName);
+    if(!file.open(QFile::ReadOnly))
+    {
+        QMessageBox::information(this, tr("Unable to open file"), file.errorString());
+        return;
+    }
+    image.load(fileName,"JPG");
+    file.close();
+}
+
+void MainWindow::showImage()
+{
+    QGraphicsScene* scene = new QGraphicsScene();
+    QGraphicsView* view = new QGraphicsView(scene);
+    QGraphicsPixmapItem* item = new QGraphicsPixmapItem(QPixmap::fromImage(image));
+    scene->addItem(item);
+    view->show();
 }
 
 void MainWindow::denoisingFilter()
