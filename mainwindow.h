@@ -5,11 +5,11 @@
 #include "QMessageBox"
 #include "QFileDialog"
 #include "QImage"
-#include "QLabel"
-#include "QScrollArea"
+#include "QFile"
 #include "QGraphicsScene"
 #include "QGraphicsPixmapItem"
 #include "QGraphicsView"
+#include "QImageWriter"
 
 namespace Ui {
 class MainWindow;
@@ -24,14 +24,20 @@ public:
     ~MainWindow();
     
 private slots:
-    void on_pushButton_clicked();
     void openPicture();
     void savePictureAs();
     void savePicture();
     void denoisingFilter();
+    void showImageBefore();
+    void showImageAfter();
+    void writeFile(QString fileName);
+    void readFile(QString fileName);
 
 private:
     Ui::MainWindow *ui;
+    QImage imageBefore, imageAfter;
+    QString fileOpenedName;
+    QGraphicsScene* scene;
 };
 
 #endif // MAINWINDOW_H
