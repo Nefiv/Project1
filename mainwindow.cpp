@@ -13,7 +13,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionSave_as, SIGNAL(triggered()), this, SLOT(savePictureAs()));
     connect(ui->actionSave, SIGNAL(triggered()), this, SLOT(savePicture()));
     connect(ui->actionExit, SIGNAL(triggered()), qApp, SLOT(quit()));
-    connect(ui->actionDenoising, SIGNAL(triggered()), this, SLOT(denoising()));
+    connect(ui->actionDenoising, SIGNAL(triggered()), this, SLOT(denoisingFilter()));
 }
 
 MainWindow::~MainWindow()
@@ -27,7 +27,6 @@ void MainWindow::openPicture()
          if (!fileOpenedName.isEmpty()) {
              readFile(fileOpenedName);
             showImageBefore();
-            showImageAfter();
          }
 }
 
@@ -104,7 +103,7 @@ void MainWindow::denoisingFilter()
      int imageH = imageBefore.height();
 
      imageAfter = imageBefore;
-/*
+
      int KNN_WINDOW_RADIUS = 3;
      int INV_KNN_WINDOW_AREA ( 1.0f / (float)
                            ((2*KNN_WINDOW_RADIUS+1)*(2*KNN_WINDOW_RADIUS+1)) );
@@ -192,7 +191,7 @@ void MainWindow::denoisingFilter()
                                          clr.z()
                                             )
                                      );
-    }*/
+    }
 
      showImageAfter();
 
