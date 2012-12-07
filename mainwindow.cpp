@@ -27,7 +27,6 @@ void MainWindow::openPicture()
          if (!fileOpenedName.isEmpty()) {
              readFile(fileOpenedName);
             showImageBefore();
-            showImageAfter();
          }
 }
 
@@ -100,17 +99,102 @@ void MainWindow::showImageAfter()
 
 void MainWindow::denoisingFilter()
 {
-    QPixmap pixMap;
-    pixMap.fromImage(imageBefore,Qt::AutoColor);
-    QRgb **rgbColor;
-    rgbColor = new QRgb*[pixMap.width()];
-    for(int i = 0 ; i < pixMap.width() ; i++)
-    {
-        rgbColor[i] = new QRgb[pixMap.height()];
-        for(int j = 0 ; j < pixMap.height() ; j++)
-            rgbColor[i][j] = imageBefore.pixel(i,j);
+     int imageW =  imageBefore.width();
+     int imageH = imageBefore.height();
+
+     imageAfter = imageBefore;
+
+     int KNN_WINDOW_RADIUS = 3;
+     int INV_KNN_WINDOW_AREA ( 1.0f / (float)
+                           ((2*KNN_WINDOW_RADIUS+1)*(2*KNN_WINDOW_RADIUS+1)) );
+    int KNN_WEIGHT_THRESHOLD  =  0.02f;
+    int KNN_LERP_THRESHOLD    =  0.79f;
+
+     float Noise = 10;
+     float lerpC = 0.2;
+
+     for (int x = 0; x<imageW; x++ )
+         for (int y = 0; y<imageH; y++ )
+         {
+             //const int ix = blockDim.x * blockIdx.x + threadIdx.x;
+             //const int iy = blockDim.y * blockIdx.y + threadIdx.y;
+             //Add half of a texel to always address exact texel centers
+             //const float x = (float)ix + 0.5f;
+             //const float y = (float)iy + 0.5f;
+
+                 //Normalized counter for the weight threshold
+                 float fCount = 0;
+                 //Total sum of pixel weights
+                 float sumWeights = 0;
+                 //Result accumulator
+                 QVector3D clr(0, 0, 0);
+                 //Center of the KNN window
+                 QRgb qrgb = imageBefore.pixel(x,y);
+                 QVector3D clr00(
+                             qRed(qrgb),
+                             qGreen(qrgb),
+                             qBlue(qrgb)
+                             );
+
+
+                 //Cycle through KNN window, surrounding (x, y) texel
+                 for (float i = -KNN_WINDOW_RADIUS; i <= KNN_WINDOW_RADIUS; i++)
+                     for (float j = -KNN_WINDOW_RADIUS; j <= KNN_WINDOW_RADIUS; j++)
+                     {
+                         qrgb = imageBefore.pixel(x+j,y+i);
+                         QVector3D clrIJ(
+                                      qRed(qrgb),
+                                      qGreen(qrgb),
+                                      qBlue(qrgb)
+                                      );
+
+
+                         float distanceIJ = clr00.length() - clrIJ.length();
+
+                         //Derive final weight from color distance
+                         float   weightIJ = qExp(- (distanceIJ * Noise + (i * i + j * j) * INV_KNN_WINDOW_AREA));
+
+                         //Accumulate (x + j, y + i) texel color with computed weight
+                         clr.setX(clr.x() + clrIJ.x() * weightIJ);
+                         clr.setY(clr.y() + clrIJ.y() * (qreal)weightIJ);
+                         clr.setZ(clr.z() + clrIJ.z() * (qreal)weightIJ);
+
+                         //Sum of weights for color normalization to [0..1] range
+                         sumWeights     += weightIJ;
+
+                         //Update weight counter, if KNN weight for current window texel
+                         //exceeds the weight threshold
+                         fCount         += (weightIJ > KNN_WEIGHT_THRESHOLD) ? INV_KNN_WINDOW_AREA : 0;
+                     }
+
+                 //Normalize result color by sum of weights
+                 sumWeights = 1.0f / sumWeights;
+                 clr.setX(clr.x() * sumWeights);
+                 clr.setY(clr.x() * sumWeights);
+                 clr.setZ(clr.x() * sumWeights);
+
+                 //Choose LERP quotent basing on how many texels
+                 //within the KNN window exceeded the weight threshold
+                 float lerpQ = (fCount > KNN_LERP_THRESHOLD) ? lerpC : 1.0f - lerpC;
+
+                 //Write final result to global memory
+                 clr.setX(clr.x() + (clr00.x() - clr.x()) * lerpQ);
+                 clr.setY(clr.y() + (clr00.y() - clr.y()) * lerpQ);
+                 clr.setZ(clr.z() + (clr00.z() - clr.z()) * lerpQ);
+                 //dst[imageW * iy + ix] = make_color(clr.x, clr.y, clr.z, 0);
+                 imageAfter.setPixel(
+                                     x,
+                                     y,
+                                     qRgb(
+                                         clr.x(),
+                                         clr.y(),
+                                         clr.z()
+                                            )
+                                     );
     }
-    for(int i = 0 ; i < pixMap.width() ; i++)
-        delete [] rgbColor[i];
-    delete [] rgbColor;
+
+     showImageAfter();
+
+    //Tak bym chcia³ to wywo³ywaæ:
+    //imageAfter = denoisingFilter.knnFilter(imageBefore);
 }
