@@ -9,11 +9,14 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     ui->label->setStyleSheet("* { background-color: rgb(170,255,127) }");
     ui->label_2->setStyleSheet("* { background-color: rgb(85,170,255) }");
+    ui->frame->setStyleSheet("* { background-color: rgb(251,255,179) }");
+    ui->frame->hide();
     connect(ui->actionOpen, SIGNAL(triggered()), this, SLOT(openPicture()));
     connect(ui->actionSave_as, SIGNAL(triggered()), this, SLOT(savePictureAs()));
     connect(ui->actionSave, SIGNAL(triggered()), this, SLOT(savePicture()));
     connect(ui->actionExit, SIGNAL(triggered()), qApp, SLOT(quit()));
     connect(ui->actionDenoising, SIGNAL(triggered()), this, SLOT(denoisingFilter()));
+    connect(ui->actionCustom_Filter, SIGNAL(triggered()), this, SLOT(customFilter()));
 }
 
 MainWindow::~MainWindow()
@@ -21,12 +24,17 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+//===================================== O P E N  &  S A V E  F U N C T I O N S =================================
+
 void MainWindow::openPicture()
 {
     fileOpenedName = QFileDialog::getOpenFileName(this, tr("Open File"), QDir::currentPath(),tr("Image (*jpg)"));
-         if (!fileOpenedName.isEmpty()) {
-             readFile(fileOpenedName);
+         if (!fileOpenedName.isEmpty())
+         {
+            readFile(fileOpenedName);
             showImageBefore();
+            ui->label_8->setText(QString::number(imageBefore.width()));
+            ui->label_9->setText(QString::number(imageBefore.height()));
          }
 }
 
@@ -37,11 +45,8 @@ void MainWindow::savePictureAs()
     if(reply == QMessageBox::Yes)
     {
         QString fileOpenedName = QFileDialog::getSaveFileName(this ,tr("Save as..") ,QDir::currentPath(),tr("Image (*jpg)"));
-            if (fileOpenedName.isEmpty())
-                 return;
-             else {
-                writeFile(fileOpenedName);
-        }
+            if (fileOpenedName.isEmpty()) return;
+            else writeFile(fileOpenedName);
     }
 }
 
@@ -49,10 +54,7 @@ void MainWindow::savePicture()
 {
     QMessageBox::StandardButton reply;
     reply = QMessageBox::question(this, "Save it??", "Do you really to save this image??", QMessageBox::Yes | QMessageBox::No);
-    if(reply == QMessageBox::Yes)
-    {
-        writeFile(fileOpenedName);
-    }
+    if(reply == QMessageBox::Yes) writeFile(fileOpenedName);
 }
 
 void MainWindow::writeFile(QString fileName)
@@ -79,6 +81,8 @@ void MainWindow::readFile(QString fileName)
     file.close();
 }
 
+//================================ S H O W  I M A G E  F U N C T I O N =============================
+
 void MainWindow::showImageBefore()
 {
     scene = new QGraphicsScene(this);
@@ -97,104 +101,71 @@ void MainWindow::showImageAfter()
     ui->graphicsView_2->show();
 }
 
+//================================================ F I L T E R S  C L A S S ===========================================
+
 void MainWindow::denoisingFilter()
 {
-     int imageW =  imageBefore.width();
-     int imageH = imageBefore.height();
+    showImageAfter();
+}
 
-     imageAfter = imageBefore;
+void MainWindow::customFilter()
+{
+    ui->frame->show();
+}
 
-     int KNN_WINDOW_RADIUS = 3;
-     int INV_KNN_WINDOW_AREA ( 1.0f / (float)
-                           ((2*KNN_WINDOW_RADIUS+1)*(2*KNN_WINDOW_RADIUS+1)) );
-    int KNN_WEIGHT_THRESHOLD  =  0.02f;
-    int KNN_LERP_THRESHOLD    =  0.79f;
+void MainWindow::on_showImageCustomFilterButton_clicked()
+{
+    if(ui->spinBox_51->value() != 0)
+    {
+        int ** conversionMatrix;
+        conversionMatrix = new int * [5];
+        for(int i = 0; i<5 ; i++)
+        {
+            conversionMatrix [i] = new int[5];
+        }
+        conversionMatrix[0][0] = (int)ui->spinBox->value();
+        conversionMatrix[0][1] = (int)ui->spinBox_2->value();
+        conversionMatrix[0][2] = (int)ui->spinBox_3->value();
+        conversionMatrix[0][3] = (int)ui->spinBox_4->value();
+        conversionMatrix[0][4] = (int)ui->spinBox_5->value();
 
-     float Noise = 10;
-     float lerpC = 0.2;
+        conversionMatrix[1][0] = (int)ui->spinBox_6->value();
+        conversionMatrix[1][1] = (int)ui->spinBox_7->value();
+        conversionMatrix[1][2] = (int)ui->spinBox_8->value();
+        conversionMatrix[1][3] = (int)ui->spinBox_9->value();
+        conversionMatrix[1][4] = (int)ui->spinBox_10->value();
 
-     for (int x = 0; x<imageW; x++ )
-         for (int y = 0; y<imageH; y++ )
-         {
-             //const int ix = blockDim.x * blockIdx.x + threadIdx.x;
-             //const int iy = blockDim.y * blockIdx.y + threadIdx.y;
-             //Add half of a texel to always address exact texel centers
-             //const float x = (float)ix + 0.5f;
-             //const float y = (float)iy + 0.5f;
+        conversionMatrix[2][0] = (int)ui->spinBox_11->value();
+        conversionMatrix[2][1] = (int)ui->spinBox_12->value();
+        conversionMatrix[2][2] = (int)ui->spinBox_13->value();
+        conversionMatrix[2][3] = (int)ui->spinBox_14->value();
+        conversionMatrix[2][4] = (int)ui->spinBox_15->value();
 
-                 //Normalized counter for the weight threshold
-                 float fCount = 0;
-                 //Total sum of pixel weights
-                 float sumWeights = 0;
-                 //Result accumulator
-                 QVector3D clr(0, 0, 0);
-                 //Center of the KNN window
-                 QRgb qrgb = imageBefore.pixel(x,y);
-                 QVector3D clr00(
-                             qRed(qrgb),
-                             qGreen(qrgb),
-                             qBlue(qrgb)
-                             );
+        conversionMatrix[3][0] = (int)ui->spinBox_16->value();
+        conversionMatrix[3][1] = (int)ui->spinBox_17->value();
+        conversionMatrix[3][2] = (int)ui->spinBox_18->value();
+        conversionMatrix[3][3] = (int)ui->spinBox_19->value();
+        conversionMatrix[3][4] = (int)ui->spinBox_20->value();
 
+        conversionMatrix[4][0] = (int)ui->spinBox_21->value();
+        conversionMatrix[4][1] = (int)ui->spinBox_22->value();
+        conversionMatrix[4][2] = (int)ui->spinBox_23->value();
+        conversionMatrix[4][3] = (int)ui->spinBox_24->value();
+        conversionMatrix[4][4] = (int)ui->spinBox_25->value();
 
-                 //Cycle through KNN window, surrounding (x, y) texel
-                 for (float i = -KNN_WINDOW_RADIUS; i <= KNN_WINDOW_RADIUS; i++)
-                     for (float j = -KNN_WINDOW_RADIUS; j <= KNN_WINDOW_RADIUS; j++)
-                     {
-                         qrgb = imageBefore.pixel(x+j,y+i);
-                         QVector3D clrIJ(
-                                      qRed(qrgb),
-                                      qGreen(qrgb),
-                                      qBlue(qrgb)
-                                      );
+        Filters * newFilter = new Filters(imageBefore, conversionMatrix);
+        newFilter->customFilter(ui->spinBox_51->value(), ui->spinBox_52->value());
+        imageAfter = newFilter->getImageAfter();
 
+        for(int i = 0; i<5; i++)
+            delete []conversionMatrix[i];
+        delete []conversionMatrix;
 
-                         float distanceIJ = clr00.length() - clrIJ.length();
-
-                         //Derive final weight from color distance
-                         float   weightIJ = qExp(- (distanceIJ * Noise + (i * i + j * j) * INV_KNN_WINDOW_AREA));
-
-                         //Accumulate (x + j, y + i) texel color with computed weight
-                         clr.setX(clr.x() + clrIJ.x() * weightIJ);
-                         clr.setY(clr.y() + clrIJ.y() * (qreal)weightIJ);
-                         clr.setZ(clr.z() + clrIJ.z() * (qreal)weightIJ);
-
-                         //Sum of weights for color normalization to [0..1] range
-                         sumWeights     += weightIJ;
-
-                         //Update weight counter, if KNN weight for current window texel
-                         //exceeds the weight threshold
-                         fCount         += (weightIJ > KNN_WEIGHT_THRESHOLD) ? INV_KNN_WINDOW_AREA : 0;
-                     }
-
-                 //Normalize result color by sum of weights
-                 sumWeights = 1.0f / sumWeights;
-                 clr.setX(clr.x() * sumWeights);
-                 clr.setY(clr.x() * sumWeights);
-                 clr.setZ(clr.x() * sumWeights);
-
-                 //Choose LERP quotent basing on how many texels
-                 //within the KNN window exceeded the weight threshold
-                 float lerpQ = (fCount > KNN_LERP_THRESHOLD) ? lerpC : 1.0f - lerpC;
-
-                 //Write final result to global memory
-                 clr.setX(clr.x() + (clr00.x() - clr.x()) * lerpQ);
-                 clr.setY(clr.y() + (clr00.y() - clr.y()) * lerpQ);
-                 clr.setZ(clr.z() + (clr00.z() - clr.z()) * lerpQ);
-                 //dst[imageW * iy + ix] = make_color(clr.x, clr.y, clr.z, 0);
-                 imageAfter.setPixel(
-                                     x,
-                                     y,
-                                     qRgb(
-                                         clr.x(),
-                                         clr.y(),
-                                         clr.z()
-                                            )
-                                     );
+        imageAfter = newFilter->getImageAfter();
+        showImageAfter();
     }
-
-     showImageAfter();
-
-    //Tak bym chcia³ to wywo³ywaæ:
-    //imageAfter = denoisingFilter.knnFilter(imageBefore);
+    else
+    {
+        QMessageBox::information(this, tr("Wrong scales value"),tr("Scale doesn't be \"0\" value! Try again."));
+    }
 }

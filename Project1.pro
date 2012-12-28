@@ -12,9 +12,9 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-    denoisingFilter.cpp
+    filters.cpp
 
 HEADERS  += mainwindow.h \
-    denoisingFilter.h
+    filters.h
 
 FORMS    += mainwindow.ui

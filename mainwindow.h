@@ -11,9 +11,8 @@
 #include "QGraphicsPixmapItem"
 #include "QGraphicsView"
 #include "QImageWriter"
-#include "denoisingFilter.h"
-#include <QVector3D>
-#include <QtCore/qmath.h>
+#include "QString"
+#include "filters.h"
 
 namespace Ui {
 class MainWindow;
@@ -32,16 +31,16 @@ private slots:
     void savePictureAs();
     void savePicture();
     void denoisingFilter();
+    void customFilter();
+    void on_showImageCustomFilterButton_clicked();
+
+private:
     void showImageBefore();
     void showImageAfter();
     void writeFile(QString fileName);
     void readFile(QString fileName);
-
-    void on_actionDenoising_triggered();
-
-private:
-    Ui::MainWindow *ui;
     QImage imageBefore, imageAfter;
+    Ui::MainWindow *ui;
     QString fileOpenedName;
     QGraphicsScene* scene;
 };
