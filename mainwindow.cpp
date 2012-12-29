@@ -32,10 +32,13 @@ void MainWindow::openPicture()
          if (!fileOpenedName.isEmpty())
          {
             readFile(fileOpenedName);
+            ui->graphicsView->hide();
+            ui->graphicsView_2->hide();
             showImageBefore();
             ui->label_8->setText(QString::number(imageBefore.width()));
             ui->label_9->setText(QString::number(imageBefore.height()));
          }
+         fileOpenedName = "";
 }
 
 void MainWindow::savePictureAs()
@@ -44,7 +47,7 @@ void MainWindow::savePictureAs()
     reply = QMessageBox::question(this, "Save it??", "Do you really to save this image??", QMessageBox::Yes | QMessageBox::No);
     if(reply == QMessageBox::Yes)
     {
-        QString fileOpenedName = QFileDialog::getSaveFileName(this ,tr("Save as..") ,QDir::currentPath(),tr("Image (*jpg)"));
+        fileOpenedName = QFileDialog::getSaveFileName(this ,tr("Save as..") ,QDir::currentPath(),tr("Image (*jpg)"));
             if (fileOpenedName.isEmpty()) return;
             else writeFile(fileOpenedName);
     }
@@ -54,7 +57,16 @@ void MainWindow::savePicture()
 {
     QMessageBox::StandardButton reply;
     reply = QMessageBox::question(this, "Save it??", "Do you really to save this image??", QMessageBox::Yes | QMessageBox::No);
-    if(reply == QMessageBox::Yes) writeFile(fileOpenedName);
+    if(reply == QMessageBox::Yes)
+    {
+        if(!fileOpenedName.isEmpty()) writeFile(fileOpenedName);
+        else
+        {
+            fileOpenedName = QFileDialog::getSaveFileName(this ,tr("Save as..") ,QDir::currentPath(),tr("Image (*jpg)"));
+            if (fileOpenedName.isEmpty()) return;
+            else writeFile(fileOpenedName);
+        }
+    }
 }
 
 void MainWindow::writeFile(QString fileName)
@@ -105,6 +117,15 @@ void MainWindow::showImageAfter()
 
 void MainWindow::denoisingFilter()
 {
+    Filters * newFilter = new Filters();
+    newFilter->setSizeMatrix(7);
+    newFilter->denoisingFilter(imageBefore);
+    for(int i = 0 ; i < 4 ; i++)
+    {
+        imageAfter = newFilter->getImageAfter();
+        newFilter->denoisingFilter(imageAfter);
+    }
+    imageAfter = newFilter->getImageAfter();
     showImageAfter();
 }
 
@@ -154,8 +175,8 @@ void MainWindow::on_showImageCustomFilterButton_clicked()
         conversionMatrix[4][4] = (int)ui->spinBox_25->value();
 
         Filters * newFilter = new Filters(imageBefore, conversionMatrix);
+        newFilter->setSizeMatrix(5);
         newFilter->customFilter(ui->spinBox_51->value(), ui->spinBox_52->value());
-        imageAfter = newFilter->getImageAfter();
 
         for(int i = 0; i<5; i++)
             delete []conversionMatrix[i];
@@ -163,6 +184,7 @@ void MainWindow::on_showImageCustomFilterButton_clicked()
 
         imageAfter = newFilter->getImageAfter();
         showImageAfter();
+        delete newFilter;
     }
     else
     {
