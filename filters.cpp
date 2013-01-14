@@ -314,9 +314,9 @@ void Filters::customFilter(int scale, int offset)
 {
     int componentRedColor, componentGreenColor, componentBlueColor;
     QColor colorPixel;
-    for(int x = 0; x < imageBefore.width(); x++)
+    for(int x = 1; x < imageBefore.width(); x++)
     {
-        for(int y = 0; y < imageBefore.height(); y++)
+        for(int y = 1; y < imageBefore.height(); y++)
         {
             componentRedColor = 0;
             componentGreenColor = 0;
@@ -357,9 +357,9 @@ void Filters::denoisingFilter(QImage imageBefore)
     double fCount = 0.0;
     float lerpQ = 0.0;
     QColor colorPixel;
-    for(int x = 0; x < imageBefore.width(); x++)
+    for(int x = 1; x < imageBefore.width(); x++)
     {
-        for(int y = 0; y < imageBefore.height(); y++)
+        for(int y = 1; y < imageBefore.height(); y++)
         {
             sumWeights = 0.0;
             componentRedColor = 0.0;

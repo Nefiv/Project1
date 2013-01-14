@@ -184,7 +184,6 @@ void MainWindow::on_showImageCustomFilterButton_clicked()
 
         imageAfter = newFilter->getImageAfter();
         showImageAfter();
-        delete newFilter;
     }
     else
     {
