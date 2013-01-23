@@ -564,6 +564,88 @@ p, li { white-space: pre-wrap; }
      <string>TextLabel</string>
     </property>
    </widget>
+   <widget class="QPushButton" name="pushButton">
+    <property name="geometry">
+     <rect>
+      <x>260</x>
+      <y>600</y>
+      <width>111</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Generate e,d and n</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="lineE">
+    <property name="geometry">
+     <rect>
+      <x>390</x>
+      <y>600</y>
+      <width>41</width>
+      <height>20</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="lineD">
+    <property name="geometry">
+     <rect>
+      <x>450</x>
+      <y>600</y>
+      <width>41</width>
+      <height>20</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="lineN">
+    <property name="geometry">
+     <rect>
+      <x>510</x>
+      <y>600</y>
+      <width>41</width>
+      <height>20</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_10">
+    <property name="geometry">
+     <rect>
+      <x>380</x>
+      <y>600</y>
+      <width>16</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>e:</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_11">
+    <property name="geometry">
+     <rect>
+      <x>440</x>
+      <y>600</y>
+      <width>16</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>d:</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_12">
+    <property name="geometry">
+     <rect>
+      <x>500</x>
+      <y>600</y>
+      <width>21</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>n:</string>
+    </property>
+   </widget>
    <zorder>graphicsView</zorder>
    <zorder>graphicsView_2</zorder>
    <zorder>label_2</zorder>
@@ -572,6 +654,13 @@ p, li { white-space: pre-wrap; }
    <zorder>label_4</zorder>
    <zorder>label_8</zorder>
    <zorder>label_9</zorder>
+   <zorder>pushButton</zorder>
+   <zorder>lineE</zorder>
+   <zorder>lineD</zorder>
+   <zorder>lineN</zorder>
+   <zorder>label_10</zorder>
+   <zorder>label_11</zorder>
+   <zorder>label_12</zorder>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
@@ -579,7 +668,7 @@ p, li { white-space: pre-wrap; }
      <x>0</x>
      <y>0</y>
      <width>1199</width>
-     <height>21</height>
+     <height>20</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -611,6 +700,14 @@ p, li { white-space: pre-wrap; }
    <addaction name="actionDenoising"/>
    <addaction name="separator"/>
    <addaction name="actionCustom_Filter"/>
+   <addaction name="separator"/>
+   <addaction name="actionInsert_Image"/>
+   <addaction name="separator"/>
+   <addaction name="actionExtract_Image"/>
+   <addaction name="separator"/>
+   <addaction name="actionEncode_Image"/>
+   <addaction name="separator"/>
+   <addaction name="actionDecode_Image"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionOpen">
@@ -620,7 +717,10 @@ p, li { white-space: pre-wrap; }
   </action>
   <action name="actionSave_as">
    <property name="text">
-    <string>Save as..</string>
+    <string>Save as...</string>
+   </property>
+   <property name="toolTip">
+    <string>Save as...</string>
    </property>
   </action>
   <action name="actionSave">
@@ -641,6 +741,32 @@ p, li { white-space: pre-wrap; }
   <action name="actionCustom_Filter">
    <property name="text">
     <string>Custom Filter</string>
+   </property>
+  </action>
+  <action name="actionInsert_Image">
+   <property name="text">
+    <string>Insert Image</string>
+   </property>
+   <property name="toolTip">
+    <string>Insert Image</string>
+   </property>
+  </action>
+  <action name="actionExtract_Image">
+   <property name="text">
+    <string>Extract Image</string>
+   </property>
+   <property name="toolTip">
+    <string>Extract Image</string>
+   </property>
+  </action>
+  <action name="actionEncode_Image">
+   <property name="text">
+    <string>Encode Image</string>
+   </property>
+  </action>
+  <action name="actionDecode_Image">
+   <property name="text">
+    <string>Decode Image</string>
    </property>
   </action>
  </widget>

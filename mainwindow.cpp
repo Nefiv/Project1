@@ -11,9 +11,6 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->label_2->setStyleSheet("* { background-color: rgb(85,170,255) }");
     ui->frame->setStyleSheet("* { background-color: rgb(251,255,179) }");
     ui->frame->hide();
-    connect(ui->actionOpen, SIGNAL(triggered()), this, SLOT(openPicture()));
-    connect(ui->actionSave_as, SIGNAL(triggered()), this, SLOT(savePictureAs()));
-    connect(ui->actionSave, SIGNAL(triggered()), this, SLOT(savePicture()));
     connect(ui->actionExit, SIGNAL(triggered()), qApp, SLOT(quit()));
     connect(ui->actionDenoising, SIGNAL(triggered()), this, SLOT(denoisingFilter()));
     connect(ui->actionCustom_Filter, SIGNAL(triggered()), this, SLOT(customFilter()));
@@ -24,14 +21,14 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-//===================================== O P E N  &  S A V E  F U N C T I O N S =================================
-
-void MainWindow::openPicture()
+//===================================== < MENU FILE  F U N C T I O N S > =================================
+// File -> Open
+void MainWindow::on_actionOpen_triggered()
 {
-    fileOpenedName = QFileDialog::getOpenFileName(this, tr("Open File"), QDir::currentPath(),tr("Image (*jpg)"));
+    fileOpenedName = QFileDialog::getOpenFileName(this, tr("Open File"), QDir::currentPath(),tr("Image (*.jpg *.bmp *.png)"));
          if (!fileOpenedName.isEmpty())
          {
-            readFile(fileOpenedName);
+            readImage(fileOpenedName, imageBefore);
             ui->graphicsView->hide();
             ui->graphicsView_2->hide();
             showImageBefore();
@@ -41,35 +38,39 @@ void MainWindow::openPicture()
          fileOpenedName = "";
 }
 
-void MainWindow::savePictureAs()
+// File -> Save As...
+void MainWindow::on_actionSave_as_triggered()
 {
-    QMessageBox::StandardButton reply;
-    reply = QMessageBox::question(this, "Save it??", "Do you really to save this image??", QMessageBox::Yes | QMessageBox::No);
-    if(reply == QMessageBox::Yes)
-    {
-        fileOpenedName = QFileDialog::getSaveFileName(this ,tr("Save as..") ,QDir::currentPath(),tr("Image (*jpg)"));
+//    QMessageBox::StandardButton reply;
+//    reply = QMessageBox::question(this, "Save it??", "Do you really want to save this image??", QMessageBox::Yes | QMessageBox::No);
+//    if(reply == QMessageBox::Yes)
+//    {
+        fileOpenedName = QFileDialog::getSaveFileName(this ,tr("Save as..") ,QDir::currentPath(),tr("Image (*.png)"));
             if (fileOpenedName.isEmpty()) return;
-            else writeFile(fileOpenedName);
-    }
+            else writeImage(fileOpenedName,imageAfter);
+//    }
 }
 
-void MainWindow::savePicture()
+// File -> Save
+void MainWindow::on_actionSave_triggered()
 {
     QMessageBox::StandardButton reply;
-    reply = QMessageBox::question(this, "Save it??", "Do you really to save this image??", QMessageBox::Yes | QMessageBox::No);
+    reply = QMessageBox::question(this, "Save it??", "Do you really want to save this image??", QMessageBox::Yes | QMessageBox::No);
     if(reply == QMessageBox::Yes)
     {
-        if(!fileOpenedName.isEmpty()) writeFile(fileOpenedName);
+        if(!fileOpenedName.isEmpty()) writeImage(fileOpenedName,imageAfter);
         else
         {
-            fileOpenedName = QFileDialog::getSaveFileName(this ,tr("Save as..") ,QDir::currentPath(),tr("Image (*jpg)"));
+            fileOpenedName = QFileDialog::getSaveFileName(this ,tr("Save as..") ,QDir::currentPath(),tr("Image (*png)"));
             if (fileOpenedName.isEmpty()) return;
-            else writeFile(fileOpenedName);
+            else writeImage(fileOpenedName, imageAfter);
         }
     }
 }
+//===================================== </ MENU FILE  F U N C T I O N S > =================================
 
-void MainWindow::writeFile(QString fileName)
+//===================================== < HELPER F U N C T I O N S > =================================
+void MainWindow::writeImage(QString fileName, QImage &source)
 {
     QFile file(fileName);
     if(!file.open(QFile::WriteOnly))
@@ -77,11 +78,12 @@ void MainWindow::writeFile(QString fileName)
         QMessageBox::information(this, tr("Unable to open file"), file.errorString());
         return;
     }
-    imageAfter.save(fileName,"JPG");
+    source.save(fileName,"PNG");
     file.close();
 }
 
-void MainWindow::readFile(QString fileName)
+//loads image from fileName (holding full path) if fileName != ""
+void MainWindow::readImage(QString fileName, QImage &image)
 {
     QFile file(fileName);
     if(!file.open(QFile::ReadOnly))
@@ -89,7 +91,7 @@ void MainWindow::readFile(QString fileName)
         QMessageBox::information(this, tr("Unable to open file"), file.errorString());
         return;
     }
-    imageBefore.load(fileName,"JPG");
+    image.load(fileName);
     file.close();
 }
 
@@ -120,7 +122,7 @@ void MainWindow::denoisingFilter()
     Filters * newFilter = new Filters();
     newFilter->setSizeMatrix(7);
     newFilter->denoisingFilter(imageBefore);
-    for(int i = 0 ; i < 4 ; i++)
+    for(int i = 0 ; i < 1 ; i++)
     {
         imageAfter = newFilter->getImageAfter();
         newFilter->denoisingFilter(imageAfter);
@@ -187,6 +189,95 @@ void MainWindow::on_showImageCustomFilterButton_clicked()
     }
     else
     {
-        QMessageBox::information(this, tr("Wrong scales value"),tr("Scale doesn't be \"0\" value! Try again."));
+        QMessageBox::information(this, tr("Wrong scale value"),tr("Scale = \"0\"! Division by 0... Format C: in 3... 2... 1..."));
     }
+}
+
+//--------------------================ IMAGE INSERT AND EXTRACT ==============----------------------------
+
+void MainWindow::on_actionInsert_Image_triggered()
+{
+    // imageBefore not loaded:
+    if (imageBefore.isNull())
+    {
+        QMessageBox::information(this, tr("ERROR"),tr("First you must open the image in which you want to hide another."));
+        return;
+    }
+     QMessageBox::information(this, tr("Choose file to hide..."),tr("REMEMBER: \n Chosen file must be much smaller than the image in which you want to hide it."));
+     QString imageToHidePath = QFileDialog::getOpenFileName(this, tr("Open File"), QDir::currentPath(),tr("Image (*.jpg *.bmp *.png)"));
+     if ( imageToHidePath != "" )
+     {
+         //load and show image to hide in After window:
+         readImage(imageToHidePath,imageAfter);
+         showImageAfter();
+         if (((imageBefore.byteCount()*3/4)/3)-2 > (imageAfter.byteCount()*3/4))
+         {
+             // hide imageAfter inside imageBefore:
+             Encoder encoder;
+             imageAfter = encoder.insertImage(imageBefore,imageAfter);
+
+             //and show it to the user
+             showImageAfter();
+         }
+         else
+         {
+             QMessageBox::information(this, tr("ERROR"),tr("File to encode is too big."));
+         }
+     }
+}
+
+void MainWindow::on_actionExtract_Image_triggered()
+{
+    // imageBefore not loaded:
+    if (imageBefore.isNull())
+    {
+        QMessageBox::information(this, tr("ERROR"),tr("First you must open the image from which you want to extract."));
+        return;
+    }
+
+    // extract image hidden in imageBefore:
+    Encoder encoder;
+    imageAfter = encoder.extractImage(imageBefore);
+
+    //and show it to the user
+    showImageAfter();
+}
+
+//--------------------================ IMAGE ENCODING AND DECODING ==============----------------------------
+
+
+void MainWindow::on_actionEncode_Image_triggered()
+{
+    // extract image hidden in imageBefore:
+    Encoder encoder;
+    int e = ui->lineE->text().toInt(),
+        n = ui->lineN->text().toInt();
+
+    imageAfter = encoder.encodeImage(imageBefore,e,n);
+
+    //and show it to the user
+    showImageAfter();
+}
+
+void MainWindow::on_actionDecode_Image_triggered()
+{
+    // extract image hidden in imageBefore:
+    Encoder encoder;
+    int d = ui->lineD->text().toInt(),
+        n = ui->lineN->text().toInt();
+
+    imageAfter = encoder.decodeImage(imageBefore,d,n);
+
+    //and show it to the user
+    showImageAfter();
+}
+
+void MainWindow::on_pushButton_clicked()
+{
+    Encoder encoder;
+    int e,d,n;
+    encoder.generate_passwords(e,d,n);
+    ui->lineE->setText(QString::number(e));
+    ui->lineD->setText(QString::number(d));
+    ui->lineN->setText(QString::number(n));
 }

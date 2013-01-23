@@ -12,9 +12,11 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-    filters.cpp
+    filters.cpp \
+    encoder.cpp
 
 HEADERS  += mainwindow.h \
-    filters.h
+    filters.h \
+    encoder.h
 
 FORMS    += mainwindow.ui
